@@ -4,30 +4,10 @@ use std::io::{ self, Read, Write };
 use std::process;
 use toml;
 use dirs;
-use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
 use colored::*;
+use super::structs::*;
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Configuration {
-  lethal_path: String,
-  mod_list: HashMap<String, ModInfo>
-}
-
-impl Configuration {
-  fn new() -> Configuration {
-    Configuration {
-      lethal_path: String::from(""),
-      mod_list: HashMap::new()
-    }
-  }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct ModInfo {
-  version: String,
-  url: String
-}
 
 pub fn install_mods() -> io::Result<()> {
   // Get application configuration
@@ -128,20 +108,43 @@ fn get_configuration() -> io::Result<Configuration> {
   Ok(configuration)
 }
 
-fn get_remote_config() -> io::Result<()> {
+fn get_remote_config() -> io::Result<RemoteModConfig> {
   // Get remote configuration from Github with a GET request
-  let url = "https://raw.githubusercontent.com/BobdaFett/LethalModInstaller/refs/heads/main/modlist.toml";
+  let url = "https://raw.githubusercontent.com/BobdaFett/LethalModInstaller-rs/refs/heads/main/modlist.toml";
   // let url = "https://raw.githubusercontent.com/BobdaFett/advent-rust-23/refs/heads/main/src/util.rs";
 
   // Send GET reqwest
   let modlist_string = reqwest::blocking::get(url).unwrap().text().unwrap();
-  println!("{}", modlist_string);
+  // println!("{}", modlist_string);
 
-  Ok(())
+  // Parse into a RemoteModConfig
+  let remote_mods: RemoteModConfig = match toml::from_str(modlist_string.as_str()) {
+    Ok(values) => values,
+    Err(_) => {
+      eprintln!("Failed to parse data from remote mod list.");
+      process::exit(1);
+    }
+  };
+  // println!("{:?}", remote_mods);
+
+  Ok(remote_mods)
 }
 
-fn download_mods() {
-  // Download mods from Github
+fn download_mods(local_mods: &mut HashMap<String, ModInfo>, remote_mods: &mut HashMap<String, ModInfo>) {
+  // Download mods that need to be installed or updated
+  remote_mods.iter_mut().for_each(|(string, remote_mod_info)| {
+    // Check values against local mods
+    match local_mods.get(string) {
+      Some(local_mod_info) => {
+        if local_mod_info.version != remote_mod_info.version {
+          // Update it, save configuration
+        }
+      },
+      None => {
+        // Download mod, save configuration
+      }
+    }
+  });
 }
 
 fn flush_stdio() {

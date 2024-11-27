@@ -1,9 +1,12 @@
 use std::io::{ self, Write };
 use std::process;
-use tokio::macros;
 
 pub mod functions;
-
+use functions::{
+  install::install_mods,
+  repair,
+  structs::*
+};
 
 fn main() {
   match get_user_input() {
@@ -13,7 +16,7 @@ fn main() {
     },
     1 => {
       println!("Run install");
-      functions::install::install_mods().unwrap();
+      install_mods().unwrap();
     },
     2 => println!("Run repair"),
     3 => println!("Run uninstall"),
