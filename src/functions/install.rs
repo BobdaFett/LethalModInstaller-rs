@@ -7,7 +7,6 @@ use dirs;
 use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
 use colored::*;
-use reqwest::blocking::get;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Configuration {
