@@ -1,0 +1,3 @@
+[mods]
+testMod = { version = "1.0.0", url = "testwebsite.com" }
+testMod2 = { version = "1.0.0", url = "testwebsite.com" }
