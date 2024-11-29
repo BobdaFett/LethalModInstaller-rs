@@ -4,7 +4,6 @@ mod forms;
 mod utils;
 
 use std::process;
-use std::io::{self, Write};
 
 fn main() {
   // Load configuration

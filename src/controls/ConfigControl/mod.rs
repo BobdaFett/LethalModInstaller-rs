@@ -34,13 +34,16 @@ pub fn get_config() -> Configuration {
 
     // Write a default configuration to the file.
     // Default is simply an empty Configuration
-    let default_config = Configuration::new();
+    let mut default_config = Configuration::new();
+    default_config.config_path = path.to_str().unwrap().to_string();
+    default_config.lethal_path = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Lethal Company".to_string();
     let toml_string = toml::to_string_pretty(&default_config).unwrap();
     fs::write(&path, toml_string.as_str()).unwrap();
     File::open(&path).expect("Failed to open configuration file")
   });
 
   // Load configuration file
+  // TODO Add extra checking
   print!("Loading configuration... ");
   flush!();
   let mut config_contents = String::new();
