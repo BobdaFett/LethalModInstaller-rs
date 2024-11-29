@@ -1,6 +1,6 @@
 use crate::utils::flush;
 use std::fs::{self, File};
-use std::io::{self, Read, Write};
+use std::io::{self, BufWriter, Read, Write};
 use toml;
 use std::process;
 use colored::*;
@@ -97,7 +97,8 @@ pub fn save_config(config: &Configuration) -> io::Result<()> {
   });
 
   // Write the serialized object to the file
-  config_file.write(&toml_string.as_bytes()).unwrap_or_else(|_| {
+  let mut writer = BufWriter::new(config_file);
+  writer.write_all(&toml_string.as_bytes()).unwrap_or_else(|_| {
     eprintln!("{}", "Failed to write to configuration file.".red());
     process::exit(1);
   });
