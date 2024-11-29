@@ -1,11 +1,8 @@
 use std::{
   fs,
   io::{
-    self,
-    copy,
-    Write
-  },
-  path::Path
+    self, copy, Write
+  }
 };
 use crate::models::*;
 use tempfile::Builder;
