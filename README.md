@@ -10,10 +10,10 @@ For now, only the installation function is developed at all. This will be edited
 
 Some planned features are:
 
- - [] Uninstallation of mods
- - [] Custom configuration support (so you don't have to use [mine](https://github.com/BobdaFett/LethalModInstaller-rs/blob/main/modlist.toml))
- - [] Support for configuration sharing using [paste.rs](https://paste.rs) or similar
- - [] Better error handling
+ - Uninstallation of mods
+ - Custom configuration support (so you don't have to use [mine](https://github.com/BobdaFett/LethalModInstaller-rs/blob/main/modlist.toml))
+ - Support for configuration sharing using [paste.rs](https://paste.rs) or similar
+ - Better error handling
 
 ## Contributing
 
