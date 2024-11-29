@@ -20,13 +20,13 @@ fn main() {
   match input {
     FunctionType::Install => {
       println!("Attempting to run installation.");
-      install_mods(&mut config)
+      install_mods(&mut config).unwrap();
     },
     _ => {
       println!("Not implemented yet, exiting...");
       process::exit(1);
     }
-  }.unwrap();
+  };
 
   println!("Done! Press enter to exit.");
   std::io::stdin().read_line(&mut String::new()).unwrap();
