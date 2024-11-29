@@ -6,20 +6,21 @@ mod models;
 
 use std::process;
 
-use controls::verify_paths;
+use forms::*;
+use controls::*;
 
 fn main() {
   // Load configuration
-  let mut config = controls::get_config();
+  let mut config = get_config();
   verify_paths(&mut config);
 
   // Get user input and run correct function
-  let input = forms::get_user_input();
+  let input = get_user_input();
   println!("Current input value: {:?}", input);
   match input {
-    forms::FunctionType::Install => {
+    FunctionType::Install => {
       println!("Attempting to run installation.");
-      controls::install_mods(&mut config)
+      install_mods(&mut config)
     },
     _ => {
       println!("Not implemented yet, exiting...");
