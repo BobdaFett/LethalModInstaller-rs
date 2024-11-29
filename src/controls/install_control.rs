@@ -1,11 +1,11 @@
-use std::io::{ self, copy, Write };
+use std::{fs, io::{ self, copy, Write }};
 use crate::controls::{ Configuration, RemoteModList, ModInfo };
 use tempfile::Builder;
 use std::fs::File;
 use crate::utils::flush;
 use colored::*;
 use zip_extract;
-use std::path::PathBuf;
+use glob::glob;
 
 pub fn install_mods(config: &mut Configuration) -> io::Result<()> {
   println!("Starting mod installation.");
@@ -45,8 +45,9 @@ fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> i
   // Get a temporary directory and filename
   let temp_dir = Builder::new().prefix("LethalModInstaller").tempdir()?;
   let filename = temp_dir.path().join(format!("{}.zip", name));
+  let lethal_mod_dir = format!("{}\\{}\\{}", lethal_dir, "BepInEx\\plugins", name);
 
-  print!("Downloading mod {} into {}... ", name, filename.to_str().unwrap());
+  print!("Downloading mod {}... ", name);
   flush!();
 
   // Get file from url with GET request
@@ -63,10 +64,42 @@ fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> i
   // Unzip the file into the lethal directory
   // Attempt to open the file again
   file = File::open(&filename).unwrap();
-  let lethal_mod_dir = format!("{}\\{}", lethal_dir, "BepInEx\\plugins");
   print!("Unzipping file to {}... ", lethal_mod_dir.to_string());
   flush!();
-  zip_extract::extract(&file, &PathBuf::from(lethal_mod_dir), false).unwrap();
+  zip_extract::extract(&file, temp_dir.path(), false).unwrap();
+
+  // Check if there is a top-level directory in the zip
+  // If there is, check the name and decide what to do from there
+  // If there isn't, just move the files into the lethal directory with a new folder.
+  // We'll do this by checking for dirs first
+  let check_files = format!("{}\\**\\{}.dll", temp_dir.path().to_str().unwrap(), name);
+  // println!("Finding dll's with pattern {}", check_files);
+  for entry in glob(&check_files).expect("Failed to read glob") {
+    match entry {
+      Ok(path) => {
+        // println!("{}", path.display());
+        let filepath_split = path.to_str().unwrap().split("\\").collect::<Vec<&str>>();
+        let single_filepath = filepath_split.last().unwrap();
+        // Get a list of files at the parent of this path
+        let filepaths = fs::read_dir(path.parent().unwrap()).unwrap();
+        filepaths.for_each(|path| {
+          let path = path.unwrap().path();
+          // Move the files to the lethal mod directory
+          let mod_path = format!("{}\\{}", lethal_mod_dir, single_filepath);
+          // println!("Moving file from {} to {}", path.display(), mod_path);
+
+          // Ensure the mod path exists
+          fs::create_dir_all(&lethal_mod_dir).unwrap();
+
+          fs::rename(path, mod_path).unwrap();
+        });
+      },
+      Err(e) => {
+        eprintln!("{}", e);
+      }
+    }
+  }
+
   println!("{}", "Done.".green());
 
   Ok(())
