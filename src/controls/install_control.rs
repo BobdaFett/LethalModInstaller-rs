@@ -1,4 +1,12 @@
-use std::{fs, io::{ self, copy, Write }};
+use std::{
+  fs,
+  io::{
+    self,
+    copy,
+    Write
+  },
+  path::Path
+};
 use crate::models::*;
 use tempfile::Builder;
 use std::fs::File;
@@ -6,6 +14,7 @@ use crate::utils::flush;
 use colored::*;
 use zip_extract;
 use glob::glob;
+
 
 pub fn install_mods(config: &mut Configuration) -> io::Result<()> {
   println!("Starting mod installation.");
@@ -81,15 +90,22 @@ fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> i
         // println!("{}", path.display());
         // Get a list of files at the parent of this path
         let filepaths = fs::read_dir(path.parent().unwrap()).unwrap();
+
+        // Attempt to delete the previously created directory
+        // If it doesn't exist, that's fine
+        println!("Deleting previous directory...");
+        let _ = fs::remove_dir_all(&lethal_mod_dir);
+        // Create the directory
+        println!("Creating directory {}", lethal_mod_dir);
+        fs::create_dir_all(&lethal_mod_dir).unwrap();
+
         filepaths.for_each(|path| {
           let path = path.unwrap().path();
           // println!("Found path {}", path.display());
 
+          // Generate the new filepath
           let filename = path.file_name().unwrap().to_str().unwrap();
           let single_filepath = format!("{}\\{}", lethal_mod_dir, filename);
-
-          // Ensure the mod path exists
-          fs::create_dir_all(&lethal_mod_dir).unwrap();
 
           println!("Moving file {:?} to {}", path.file_name().unwrap(), single_filepath);
           let rename_result = fs::rename(path, single_filepath);
