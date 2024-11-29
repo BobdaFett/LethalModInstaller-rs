@@ -17,6 +17,7 @@ use std::io::{self, Read, Write};
 use toml;
 use std::process;
 use colored::*;
+use glob::glob;
 
 pub fn get_config() -> Configuration {
   // Find configuration file
@@ -41,9 +42,9 @@ pub fn get_config() -> Configuration {
     fs::write(&path, toml_string.as_str()).unwrap();
     File::open(&path).expect("Failed to open configuration file")
   });
+  println!("{}", "Done.".green());
 
   // Load configuration file
-  // TODO Add extra checking
   print!("Loading configuration... ");
   flush!();
   let mut config_contents = String::new();
@@ -62,7 +63,42 @@ pub fn get_config() -> Configuration {
   }
 }
 
-pub fn save_config(config: Configuration) -> io::Result<()> {
+pub fn verify_paths(config: &mut Configuration) {
+  // Check lethal mods path
+  // If it doesn't exist, ask the user to input it
+  print!("Looking for Lethal Company directory... ");
+  flush!();
+
+  let mut valid_path = false;
+  while !valid_path {
+    let lethal_exe_path = format!("{}\\Lethal Company.exe", config.lethal_path);
+    for entry in glob(&lethal_exe_path).expect("Failed to read glob") {
+      if let Ok(_) = entry {
+        println!("{}", "Found.".green());
+        valid_path = true;
+      }
+    }
+
+    if valid_path {
+      break;
+    }
+
+    println!("{}", "Not found.".red());
+    print!("Please enter the path to your Lethal Company directory: ");
+    flush!();
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).expect("Failed to read input");
+    config.lethal_path = input.trim().to_string();
+  }
+
+  // Check bepinex path relative to lethal mods path
+  // TODO Implement this - this will become an optional feature.
+
+  // Write configuration to file
+  save_config(&config).expect("Couldn't save configuration file");
+}
+
+pub fn save_config(config: &Configuration) -> io::Result<()> {
   // Open configuration file - the path is saved in the config object.
   let mut config_file = File::open(&config.config_path)?;
 

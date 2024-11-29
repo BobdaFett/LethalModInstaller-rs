@@ -5,9 +5,12 @@ mod utils;
 
 use std::process;
 
+use controls::verify_paths;
+
 fn main() {
   // Load configuration
   let mut config = controls::get_config();
+  verify_paths(&mut config);
 
   // Get user input and run correct function
   let input = forms::get_user_input();
@@ -22,4 +25,7 @@ fn main() {
       process::exit(1);
     }
   }.unwrap();
+
+  println!("Done! Press enter to exit.");
+  std::io::stdin().read_line(&mut String::new()).unwrap();
 }
