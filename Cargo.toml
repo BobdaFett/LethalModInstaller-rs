@@ -6,9 +6,8 @@ edition = "2021"
 [dependencies]
 colored = "2.1.0"
 dirs = "5.0.1"
-reqwest = { version = "0.12.9", features = [ "blocking" ] }
-serde = "1.0.215"
-serde_derive = "1.0.215"
+reqwest = { version = "0.12.9", features = [ "blocking", "stream" ] }
+serde = { version = "1.0.215", features = ["derive"] }
 tempfile = "3.14.0"
 tokio = "1.41.1"
 toml = { version = "0.8.19", features = ["parse"] }
