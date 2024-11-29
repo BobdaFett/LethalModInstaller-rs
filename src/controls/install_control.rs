@@ -42,9 +42,11 @@ pub fn install_mods(config: &mut Configuration) -> io::Result<()> {
 // TODO Put in extra error handling
 fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> io::Result<()> {
   let url = &info.url;
-  // Get a temporary directory and filename
+  // Get a temporary directory
   let temp_dir = Builder::new().prefix("LethalModInstaller").tempdir()?;
+  // Filename for the downloaded zip file
   let filename = temp_dir.path().join(format!("{}.zip", name));
+  // Mod directory specific to this mod
   let lethal_mod_dir = format!("{}\\{}\\{}", lethal_dir, "BepInEx\\plugins", name);
 
   print!("Downloading mod {}... ", name);
@@ -64,8 +66,7 @@ fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> i
   // Unzip the file into the lethal directory
   // Attempt to open the file again
   file = File::open(&filename).unwrap();
-  print!("Unzipping file to {}... ", lethal_mod_dir.to_string());
-  flush!();
+  println!("Installing {}...", name);
   zip_extract::extract(&file, temp_dir.path(), false).unwrap();
 
   // Check if there is a top-level directory in the zip
@@ -78,20 +79,23 @@ fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> i
     match entry {
       Ok(path) => {
         // println!("{}", path.display());
-        let filepath_split = path.to_str().unwrap().split("\\").collect::<Vec<&str>>();
-        let single_filepath = filepath_split.last().unwrap();
         // Get a list of files at the parent of this path
         let filepaths = fs::read_dir(path.parent().unwrap()).unwrap();
         filepaths.for_each(|path| {
           let path = path.unwrap().path();
-          // Move the files to the lethal mod directory
-          let mod_path = format!("{}\\{}", lethal_mod_dir, single_filepath);
-          // println!("Moving file from {} to {}", path.display(), mod_path);
+          // println!("Found path {}", path.display());
+
+          let filename = path.file_name().unwrap().to_str().unwrap();
+          let single_filepath = format!("{}\\{}", lethal_mod_dir, filename);
 
           // Ensure the mod path exists
           fs::create_dir_all(&lethal_mod_dir).unwrap();
 
-          fs::rename(path, mod_path).unwrap();
+          println!("Moving file {:?} to {}", path.file_name().unwrap(), single_filepath);
+          let rename_result = fs::rename(path, single_filepath);
+          if let Err(e) = rename_result {
+            eprintln!("{}", e.to_string().red());
+          }
         });
       },
       Err(e) => {
@@ -100,7 +104,9 @@ fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> i
     }
   }
 
-  println!("{}", "Done.".green());
+  let success_string = format!("Mod {} installed successfully!", name);
+
+  println!("{}", success_string.green());
 
   Ok(())
 }
