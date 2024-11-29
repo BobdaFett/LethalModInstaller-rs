@@ -1,5 +1,5 @@
 use std::{fs, io::{ self, copy, Write }};
-use crate::controls::{ Configuration, RemoteModList, ModInfo };
+use crate::models::*;
 use tempfile::Builder;
 use std::fs::File;
 use crate::utils::flush;

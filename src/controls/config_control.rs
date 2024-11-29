@@ -1,16 +1,3 @@
-// Define modules
-pub mod mod_info;
-pub mod configuration;
-pub mod remote_mod_list;
-
-
-// Export modules
-pub use self::{
-  mod_info::ModInfo,
-  configuration::Configuration,
-  remote_mod_list::RemoteModList
-};
-
 use crate::utils::flush;
 use std::fs::{self, File};
 use std::io::{self, Read, Write};
@@ -18,6 +5,7 @@ use toml;
 use std::process;
 use colored::*;
 use glob::glob;
+use crate::models::Configuration;
 
 pub fn get_config() -> Configuration {
   // Find configuration file

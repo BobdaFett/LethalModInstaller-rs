@@ -2,6 +2,7 @@
 mod controls;
 mod forms;
 mod utils;
+mod models;
 
 use std::process;
 
