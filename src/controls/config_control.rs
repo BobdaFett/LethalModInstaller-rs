@@ -88,7 +88,7 @@ pub fn verify_paths(config: &mut Configuration) {
 
 pub fn save_config(config: &Configuration) -> io::Result<()> {
   // Open configuration file - the path is saved in the config object.
-  let mut config_file = File::open(&config.config_path)?;
+  let config_file = File::open(&config.config_path)?;
 
   // Serialize the configuration object
   let toml_string = toml::to_string_pretty(&config).unwrap_or_else(|_| {
