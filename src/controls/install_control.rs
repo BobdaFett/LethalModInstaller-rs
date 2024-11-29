@@ -4,7 +4,7 @@ use std::{
     self, copy, Write
   }
 };
-use crate::models::*;
+use crate::{models::*, save_config};
 use tempfile::Builder;
 use std::fs::File;
 use crate::utils::flush;
@@ -28,19 +28,28 @@ pub fn install_mods(config: &mut Configuration) -> io::Result<()> {
   // Compare local and remote mod configurations
   remote_modlist.mods.iter().for_each(|(remote_name, remote_info)| {
     let local_mod = config.mods.get(remote_name);
-    match local_mod {
-      Some(local_mod) => {
-        if local_mod.version != remote_info.version {
-          // Install mod
-          install_mod_from_url(&remote_info, &remote_name, &config.lethal_path).unwrap();
+    let install_mod = match local_mod {
+      Some(local_mod) => local_mod.version != remote_info.version,
+      None => true
+    };
+
+    if install_mod == true {
+      match install_mod_from_url(&remote_info, &remote_name, &config.lethal_path) {
+        Ok(_) => {
+          // Update the configuration
+          config.mods.insert(remote_name.clone(), remote_info.clone());
+        },
+        Err(_) => {
+          let fmt_string = format!("Error installing mod {}", remote_name);
+          eprintln!("{}", fmt_string.red());
         }
-      },
-      None => {
-        // Install mod
-        install_mod_from_url(&remote_info, &remote_name, &config.lethal_path).unwrap();
       }
+    } else {
+      println!("{}", format!("Mod {} is up to date.", remote_name).green());
     }
   });
+
+  save_config(&config).unwrap();
 
   Ok(())
 }

@@ -1,6 +1,6 @@
 use crate::utils::flush;
 use std::fs::{self, File};
-use std::io::{self, BufWriter, Read, Write};
+use std::io::{self, Read, Write};
 use toml;
 use std::process;
 use colored::*;
@@ -88,7 +88,10 @@ pub fn verify_paths(config: &mut Configuration) {
 
 pub fn save_config(config: &Configuration) -> io::Result<()> {
   // Open configuration file - the path is saved in the config object.
-  let config_file = File::open(&config.config_path)?;
+  let mut config_file = File::create(&config.config_path)?;
+
+  print!("Updating configuration... ");
+  flush!();
 
   // Serialize the configuration object
   let toml_string = toml::to_string_pretty(&config).unwrap_or_else(|_| {
@@ -97,11 +100,15 @@ pub fn save_config(config: &Configuration) -> io::Result<()> {
   });
 
   // Write the serialized object to the file
-  let mut writer = BufWriter::new(config_file);
-  writer.write_all(&toml_string.as_bytes()).unwrap_or_else(|_| {
-    eprintln!("{}", "Failed to write to configuration file.".red());
-    process::exit(1);
-  });
+  config_file.write_all(toml_string.as_bytes()).unwrap();
+  //   .unwrap_or_else(|_| {
+  //   eprintln!("{}", "Failed to write to configuration file.".red());
+  //   process::exit(1);
+  // });
+
+  // config_file.write(&toml_string.as_bytes()).unwrap();
+
+  println!("{}", "Done.".green());
 
   Ok(())
 }
