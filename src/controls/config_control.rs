@@ -101,12 +101,6 @@ pub fn save_config(config: &Configuration) -> io::Result<()> {
 
   // Write the serialized object to the file
   config_file.write_all(toml_string.as_bytes()).unwrap();
-  //   .unwrap_or_else(|_| {
-  //   eprintln!("{}", "Failed to write to configuration file.".red());
-  //   process::exit(1);
-  // });
-
-  // config_file.write(&toml_string.as_bytes()).unwrap();
 
   println!("{}", "Done.".green());
 
