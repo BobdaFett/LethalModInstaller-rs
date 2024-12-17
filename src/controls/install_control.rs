@@ -1,7 +1,7 @@
 use std::{
   fs,
   io::{
-    self, copy, Write
+    self, copy, Result, Write
   }
 };
 use crate::{models::*, save_config};
@@ -11,6 +11,7 @@ use crate::utils::flush;
 use colored::*;
 use zip_extract;
 use glob::glob;
+use dircpy::copy_dir;
 
 
 pub fn install_mods(config: &mut Configuration) -> io::Result<()> {
@@ -68,10 +69,17 @@ fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> i
   flush!();
 
   // Get file from url with GET request
-  let response = reqwest::blocking::get(url).unwrap();
+  let response = match reqwest::blocking::get(url) {
+    Ok(response) => response,
+    Err(e) => {
+      eprintln!("{}", "Failed.".red());
+      eprintln!("{}", e.to_string().red());
+      return Result::Err(io::Error::new(io::ErrorKind::Other, "Failed to get response"));
+    }
+  };
 
   // Create a file in the temp directory...
-  let mut file = File::create(&filename).unwrap();
+  let mut file = File::create(&filename)?;
 
   // ...and copy the response body into it
   let mut content: &[u8] = &response.bytes().unwrap();
@@ -80,7 +88,7 @@ fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> i
 
   // Unzip the file into the lethal directory
   // Attempt to open the file again
-  file = File::open(&filename).unwrap();
+  file = File::open(&filename)?;
   println!("Installing {}...", name);
   zip_extract::extract(&file, temp_dir.path(), false).unwrap();
 
@@ -95,7 +103,7 @@ fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> i
       Ok(path) => {
         // println!("{}", path.display());
         // Get a list of files at the parent of this path
-        let filepaths = fs::read_dir(path.parent().unwrap()).unwrap();
+        let filepaths = fs::read_dir(path.parent().unwrap())?;
 
         // Attempt to delete the previously created directory
         // If it doesn't exist, that's fine
@@ -103,7 +111,7 @@ fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> i
         let _ = fs::remove_dir_all(&lethal_mod_dir);
         // Create the directory
         println!("Creating directory {}", lethal_mod_dir);
-        fs::create_dir_all(&lethal_mod_dir).unwrap();
+        fs::create_dir_all(&lethal_mod_dir)?;
 
         filepaths.for_each(|path| {
           let path = path.unwrap().path();
@@ -113,10 +121,17 @@ fn install_mod_from_url(info: &ModInfo, name: &String, lethal_dir: &String) -> i
           let filename = path.file_name().unwrap().to_str().unwrap();
           let single_filepath = format!("{}\\{}", lethal_mod_dir, filename);
 
-          println!("Moving file {:?} to {}", path.file_name().unwrap(), single_filepath);
-          let rename_result = fs::rename(path, single_filepath);
-          if let Err(e) = rename_result {
-            eprintln!("{}", e.to_string().red());
+          println!("Copying file {:?} to {}", path.file_name().unwrap(), single_filepath);
+          if path.is_dir() {
+            // The fs::copy function doesn't (easily) work with directories
+            if let Err(e) = copy_dir(path, &single_filepath) {
+              eprintln!("{}", e.to_string().red());
+            }
+          }
+          else {
+            if let Err(e) = fs::copy(path, single_filepath) {
+              eprintln!("{}", e.to_string().red());
+            }
           }
         });
       },
