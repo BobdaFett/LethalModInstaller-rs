@@ -22,7 +22,7 @@ pub fn install_mods(config: &mut Configuration, force_install: bool, local_confi
     // If we're forcing the installation, we don't need to check the remote modlist
     // We can just use the one we have
     // This is useful for when the user wants to reinstall all mods
-    println!("Force install detected, using local configuration...");
+    println!("Using local configuration...");
     let modlist_string = fs::read_to_string("modlist.toml").unwrap();
     modlist_string
   } else {

@@ -30,14 +30,13 @@ fn main() {
       FunctionType::Repair => {
         println!("Attempting to run repair.");
         repair_mods(&mut config).unwrap();
-      }
+      },
       FunctionType::Exit => {
         println!("Exiting...");
         break;
       }
       _ => {
-        println!("Not implemented yet, exiting...");
-        process::exit(1);
+        println!("Not implemented yet! Choose a different option.");
       }
     };
   };
