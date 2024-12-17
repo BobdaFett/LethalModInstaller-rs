@@ -27,6 +27,10 @@ fn main() {
         println!("Attempting to run uninstallation.");
         uninstall_mods(&mut config, true).unwrap();
       },
+      FunctionType::Repair => {
+        println!("Attempting to run repair.");
+        repair_mods(&mut config).unwrap();
+      }
       FunctionType::Exit => {
         println!("Exiting...");
         break;
