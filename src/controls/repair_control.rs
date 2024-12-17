@@ -13,7 +13,7 @@ use super::{install_mods, uninstall_mods};
 pub fn repair_mods(config: &mut Configuration) -> io::Result<()> {
   // Run the uninstall function, without wiping the configuration
   uninstall_mods(config, false)?;
-  // Run the install function
-  install_mods(config)?;
+  // Run the install function, and force the installation
+  install_mods(config, true, true)?;
   Ok(())
 }

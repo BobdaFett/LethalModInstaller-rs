@@ -14,14 +14,24 @@ use glob::glob;
 use dircpy::copy_dir;
 
 
-pub fn install_mods(config: &mut Configuration) -> io::Result<()> {
+pub fn install_mods(config: &mut Configuration, force_install: bool, local_config_only: bool) -> io::Result<()> {
   println!("Starting mod installation.");
   // Get remote mod configuration
   let url = "https://raw.githubusercontent.com/BobdaFett/LethalModInstaller-rs/refs/heads/main/modlist.toml";
-  print!("Getting remote mod config... ");
-  flush!();
-  let modlist_string = reqwest::blocking::get(url).unwrap().text().unwrap();
-  println!("{}", "Done.".green());
+  let modlist_string = if local_config_only {
+    // If we're forcing the installation, we don't need to check the remote modlist
+    // We can just use the one we have
+    // This is useful for when the user wants to reinstall all mods
+    println!("Force install detected, using local configuration...");
+    let modlist_string = fs::read_to_string("modlist.toml").unwrap();
+    modlist_string
+  } else {
+    print!("Getting remote mod config... ");
+    flush!();
+    let modlist_string = reqwest::blocking::get(url).unwrap().text().unwrap();
+    println!("{}", "Done.".green());
+    modlist_string
+  };
 
   // Parse into RemoteModList
   let remote_modlist: RemoteModList = toml::from_str(&modlist_string).unwrap();
@@ -34,7 +44,7 @@ pub fn install_mods(config: &mut Configuration) -> io::Result<()> {
       None => true
     };
 
-    if install_mod == true {
+    if install_mod == true || force_install == true {
       match install_mod_from_url(&remote_info, &remote_name, &config.lethal_path) {
         Ok(_) => {
           // Update the configuration

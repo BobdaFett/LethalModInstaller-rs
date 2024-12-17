@@ -21,7 +21,7 @@ fn main() {
     match input {
       FunctionType::Install => {
         println!("Attempting to run installation.");
-        install_mods(&mut config).unwrap();
+        install_mods(&mut config, false, false).unwrap();
       },
       FunctionType::Uninstall => {
         println!("Attempting to run uninstallation.");
