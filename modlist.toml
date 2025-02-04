@@ -5,3 +5,7 @@ PersistentPurchases = { version = "1.2.0", url = "https://thunderstore.io/packag
 BetterItemScan = { version = "3.0.2", url = "https://thunderstore.io/package/download/PopleZoo/BetterItemScan/3.0.2/" }
 OpenBodyCams = { version = "3.0.3", url = "https://thunderstore.io/package/download/Zaggy1024/OpenBodyCams/3.0.3/" }
 ShipWindows = { version = "1.11.0", url = "https://thunderstore.io/package/download/TestAccount666/ShipWindows/1.11.0/" }
+BetterStamina = { version = "1.5.5", url = "https://thunderstore.io/package/download/FlipMods/BetterStamina/1.5.5/" }
+ReservedItemSlotCore = { version = "2.0.41", url = "https://thunderstore.io/package/download/FlipMods/ReservedItemSlotCore/2.0.41/" }
+ReservedWalkieSlot = { version = "2.0.7", url = "https://thunderstore.io/package/download/FlipMods/ReservedWalkieSlot/2.0.7/" }
+HDLethalCompany = { version = "1.5.6", url = "https://thunderstore.io/package/download/Sligili/HDLethalCompany/1.5.6/" }
